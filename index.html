@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Resenha de Livros</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,900&family=Roboto:wght@100&family=Yanone+Kaffeesatz:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="semantic/dist/semantic.min.js"></script>
+</head>
+<header>
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+          <div class="container-fluid">
+            <div class="logo" onclick="restartSite()">
+              <img src="logo.png" alt="Logo do site" height="40px">
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+              <ul class="navbar-nav">
+                <li class="nav-item">
+                  <a class="nav-link active text-light" aria-current="page" href="https://dontpad.com/trabalhocpw3456">Material</a>
+                </li>
+            </div>
+            <nav class="pesquisa">
+              <form class="d-flex">
+                <input class="form-control me-2" type="search" placeholder="Pesquisar..." aria-label="Search">
+                <button class="btn btn-outline-primary" type="submit">Buscar</button>
+              </form>
+        </nav>
+        </nav>
+        <br>
+</header>
+
+<body>
+  <div class="consulta"><br><br><img src="consulta.png" height="200px"></div>
+  <div id="bookData" class="container">
+    <div class="row" id="bookGrid"></div>
+</div>
+</body>
+
+
+<script>
+      function handleResponse(response) {
+          var bookData = document.getElementById('bookGrid');
+          bookData.innerHTML = '';
+
+          response.items.forEach(function(book) {
+              var title = book.volumeInfo.title;
+              var author = book.volumeInfo.authors ? book.volumeInfo.authors[0] : '';
+              var publishedDate = book.volumeInfo.publishedDate;
+              var description = book.searchInfo ? book.searchInfo.textSnippet : '';
+              var coverImage = book.volumeInfo.imageLinks ? book.volumeInfo.imageLinks.thumbnail : '';
+              var epubLink = getDownloadLink(book, 'epub');
+              var pdfLink = getDownloadLink(book, 'pdf');
+
+              var bookHTML = `
+                  <div class="col-12 book">
+                      <h1>${title}</h1>
+                      <h3>Autor: ${author}</h3>
+                      <p>Data de Publicação: ${publishedDate}</p>
+                      <p>${description}</p>
+                      ${epubLink ? `<p><a href="${epubLink}" target="_blank">Download EPUB</a></p>` : ''}
+                      ${pdfLink ? `<p><a href="${pdfLink}" target="_blank">Download PDF</a></p>` : ''}
+                      <img src="${coverImage}" alt="Capa do livro">
+                  </div>
+              `;
+
+              bookData.innerHTML += bookHTML;
+          });
+      }
+
+      function getDownloadLink(book, format) {
+          if (book.accessInfo && book.accessInfo[format] && book.accessInfo[format].isAvailable) {
+              return book.accessInfo[format].acsTokenLink;
+          } else {
+              return null;
+          }
+      }
+
+      function initialize() {
+          var form = document.querySelector('.pesquisa form');
+          form.addEventListener('submit', function(e) {
+              e.preventDefault();
+              var input = form.querySelector('input[type="search"]');
+              var searchTerm = input.value;
+              var script = document.createElement('script');
+              script.src = 'https://www.googleapis.com/books/v1/volumes?q=' + searchTerm + '&callback=handleResponse';
+              document.body.appendChild(script);
+              var buscarButton = document.querySelector('.pesquisa button');
+              var consultaDiv = document.querySelector('.consulta');
+              
+              buscarButton.addEventListener('click', function() {
+                consultaDiv.style.display = 'none';
+              });
+          });
+      }
+
+      function restartSite() {
+      location.reload();
+    }
+
+      window.onload = initialize;
+
+</script>
+
+</html>
